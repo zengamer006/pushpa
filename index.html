@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Creative Nerds | Digital Marketing Studio</title>
+<meta name="description" content="The Creative Nerds: brand launches, personal branding for doctors, clinic websites, booking platforms and motion graphics.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--lav:#EDE6F7;--lav2:#D6C7EC;--purple:#5B2A86;--purple2:#8B5CD6;--ink:#161321;--muted:#5d5670;--mint:#3DD9A4;--pink:#FF7AB6;--yellow:#FFD166;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  *,*::before,*::after{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:80px}
+  body{margin:0;font-family:"Inter",system-ui,sans-serif;color:var(--ink);background:var(--lav);line-height:1.6;overflow-x:hidden}
+  h1,h2,h3{font-family:"Fredoka",sans-serif;line-height:1.1;margin:0}
+  a{color:inherit}
+  button{font:inherit;cursor:pointer}
+  img,svg{max-width:100%}
+
+  /* Progress + cursor */
+  #progress{position:fixed;top:0;left:0;height:4px;width:0;background:linear-gradient(90deg,var(--purple2),var(--pink),var(--yellow));z-index:50}
+  .cursor-glow{position:fixed;width:340px;height:340px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(139,92,214,.28),transparent 65%);transform:translate(-50%,-50%);z-index:0;transition:opacity .3s}
+  @media (pointer:coarse){.cursor-glow{display:none}}
+  canvas#bg{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+
+  /* Nav */
+  nav{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;justify-content:space-between;align-items:center;padding:14px 6vw;padding-top:calc(14px + env(safe-area-inset-top,0px));background:rgba(237,230,247,.82);backdrop-filter:blur(10px)}
+  .logo{font-family:"Fredoka",sans-serif;font-weight:700;font-size:1.25rem;text-decoration:none}
+  .logo span{color:var(--purple)}
+  nav .links{display:flex;gap:22px;align-items:center}
+  nav .links a{text-decoration:none;font-weight:500;font-size:.95rem;position:relative}
+  nav .links a::after{content:"";position:absolute;left:0;bottom:-4px;height:2px;width:0;background:var(--purple);transition:width .3s}
+  nav .links a:hover::after{width:100%}
+  @media (max-width:860px){nav .links a:not(.pill){display:none}}
+
+  /* Buttons */
+  .btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:600;padding:14px 26px;border-radius:14px;border:2px solid var(--ink);background:transparent;transition:transform .2s,box-shadow .2s;position:relative}
+  .btn.primary{background:var(--purple);color:#fff;border-color:var(--purple);box-shadow:5px 5px 0 var(--ink)}
+  .btn.ghost{background:#fff}
+  .btn.pill{border-radius:999px;padding:9px 18px;font-size:.9rem;background:var(--ink);color:#fff;border-color:var(--ink)}
+  .btn:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--ink)}
+  .btn.magnet{will-change:transform}
+
+  /* Hero */
+  .hero{min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:40px;padding:120px 6vw 80px;position:relative}
+  .eyebrow{display:inline-block;font-weight:600;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;color:var(--purple);background:#fff;padding:6px 14px;border-radius:999px;margin-bottom:20px;animation:rise .8s ease both}
+  .hero h1{font-size:clamp(2.6rem,6vw,4.9rem);font-weight:700;animation:rise .8s .1s ease both}
+  .hero h1 .creative{color:var(--purple);display:inline-block;animation:wiggle 3s ease-in-out infinite;transform-origin:bottom left}
+  .hero h1 .nerds{position:relative;display:inline-block}
+  .hero h1 .nerds::after{content:"";position:absolute;left:0;right:0;bottom:.08em;height:.22em;background:var(--lav2);z-index:-1;transform:scaleX(0);transform-origin:left;animation:underline .8s .9s ease forwards}
+  .typed{display:block;margin:20px 0 6px;font-family:"Fredoka",sans-serif;font-size:1.5rem;color:var(--purple);min-height:2em;animation:rise .8s .25s ease both}
+  .typed::after{content:"|";margin-left:4px;animation:blinkc 1s steps(2) infinite}
+  .hero p.lead{font-size:1.12rem;color:var(--muted);max-width:520px;margin:12px 0 30px;animation:rise .8s .35s ease both}
+  .btns{display:flex;gap:14px;flex-wrap:wrap;animation:rise .8s .45s ease both}
+  .hero-stats{display:flex;gap:28px;margin-top:36px;animation:rise .8s .55s ease both}
+  .hero-stats div{font-family:"Fredoka",sans-serif;font-size:2rem;font-weight:700;color:var(--ink)}
+  .hero-stats small{display:block;font-family:"Inter",sans-serif;font-size:.8rem;color:var(--muted);font-weight:500}
+
+  .stage{position:relative;display:flex;justify-content:center;align-items:center;animation:rise 1s .2s ease both}
+  .blob{position:absolute;width:min(90%,440px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff,var(--lav2));animation:morph 8s ease-in-out infinite}
+  .ring{position:absolute;width:min(100%,500px);aspect-ratio:1;border:2px dashed var(--purple2);border-radius:50%;opacity:.5;animation:spin 30s linear infinite}
+  .character{width:min(78%,330px);position:relative;animation:bob 3.2s ease-in-out infinite}
+  .float{position:absolute;font-weight:700;color:var(--purple);background:#fff;border:2px solid var(--ink);border-radius:12px;padding:8px 12px;font-size:.88rem;box-shadow:3px 3px 0 var(--ink);white-space:nowrap}
+  .f1{top:6%;left:0;animation:float 4s ease-in-out infinite}
+  .f2{bottom:12%;right:-2%;animation:float 5s 1s ease-in-out infinite}
+  .f3{top:44%;right:-4%;animation:float 4.5s .5s ease-in-out infinite}
+  .f4{bottom:30%;left:-4%;animation:float 5.2s .8s ease-in-out infinite}
+  .eyes-follow{transition:transform .08s}
+
+  /* Marquee */
+  .marquee{background:var(--ink);color:var(--lav);overflow:hidden;white-space:nowrap;padding:18px 0;font-family:"Fredoka",sans-serif;font-size:1.3rem}
+  .marquee-track{display:inline-block;animation:marq 22s linear infinite}
+  .marquee span{margin:0 22px}
+  .marquee b{color:var(--yellow);font-weight:600}
+
+  /* Sections */
+  section{padding:96px 6vw;position:relative}
+  .head{max-width:700px;margin-bottom:48px}
+  .head h2{font-size:clamp(2rem,4vw,3.3rem);font-weight:700;margin:10px 0 14px}
+  .head p{color:var(--muted);font-size:1.05rem;margin:0}
+  .kicker{color:var(--purple);font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-size:.8rem;display:block}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px}
+
+  /* Founder */
+  .founder{display:grid;grid-template-columns:.9fr 1.1fr;gap:50px;align-items:center}
+  .founder .avatar{aspect-ratio:1;border-radius:28px;background:linear-gradient(135deg,var(--purple2),var(--pink));border:3px solid var(--ink);box-shadow:10px 10px 0 var(--ink);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:transform .4s}
+  .founder .avatar:hover{transform:rotate(-2deg) scale(1.02)}
+  .founder .avatar svg{width:70%}
+  .founder h3{font-size:2rem;margin:8px 0}
+  .founder p{color:var(--muted)}
+  .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+  .chip{background:#fff;border:2px solid var(--ink);border-radius:999px;padding:6px 14px;font-size:.88rem;font-weight:600;transition:transform .2s,background .2s}
+  .chip:hover{transform:translateY(-3px) rotate(-2deg);background:var(--yellow)}
+  @media (max-width:860px){.founder{grid-template-columns:1fr}.hero{grid-template-columns:1fr}.stage{order:-1}.founder .avatar{max-width:280px}}
+
+  /* Flip cards */
+  .flip{perspective:1200px;height:270px;cursor:pointer}
+  .flip-in{position:relative;width:100%;height:100%;transition:transform .7s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+  .flip:hover .flip-in,.flip.on .flip-in{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:2px solid var(--ink);border-radius:18px;padding:24px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:6px 6px 0 var(--ink)}
+  .front{background:#fff}
+  .back{background:var(--purple);color:#fff;transform:rotateY(180deg)}
+  .face .ic{font-size:2rem}
+  .face h3{font-size:1.4rem}
+  .face p{margin:0;font-size:.92rem}
+  .back ul{margin:0;padding-left:18px;font-size:.88rem}
+  .back .hint{font-size:.78rem;opacity:.8}
+
+  /* Process */
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;counter-reset:s}
+  .step{background:#fff;border:2px solid var(--ink);border-radius:18px;padding:26px;position:relative;transform:translateY(40px);opacity:0;transition:transform .7s,opacity .7s}
+  .step.in{transform:none;opacity:1}
+  .step::before{counter-increment:s;content:"0" counter(s);font-family:"Fredoka",sans-serif;font-size:2.4rem;color:var(--purple2)}
+  .step h3{font-size:1.3rem;margin:6px 0}
+  .step p{margin:0;color:var(--muted);font-size:.94rem}
+
+  /* Doctors */
+  .doctors{background:linear-gradient(160deg,#fff 0%,var(--lav) 100%)}
+  .doc-grid{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start}
+  @media (max-width:860px){.doc-grid{grid-template-columns:1fr}}
+  .panel{background:#fff;border:2px solid var(--ink);border-radius:22px;padding:30px;box-shadow:8px 8px 0 var(--purple2)}
+  .panel h3{font-size:1.5rem;margin-bottom:10px}
+  .panel p{color:var(--muted)}
+  .tags{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}
+  .tags span{background:var(--lav);border-radius:8px;padding:4px 10px;font-size:.84rem;font-weight:600}
+  .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+  .slot{border:2px solid var(--ink);border-radius:12px;padding:10px;background:#fff;font-weight:600;transition:transform .15s,background .2s}
+  .slot:hover{transform:translateY(-2px);background:var(--lav)}
+  .slot.taken{background:#eee;color:#999;text-decoration:line-through;cursor:not-allowed}
+  .slot.sel{background:var(--mint)}
+
+  /* Portfolio */
+  .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px}
+  .filters button{border:2px solid var(--ink);background:#fff;border-radius:999px;padding:8px 16px;font-weight:600;transition:all .2s}
+  .filters button.active,.filters button:hover{background:var(--ink);color:#fff}
+  .work{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:22px}
+  .work-item{border:2px solid var(--ink);border-radius:20px;overflow:hidden;background:#fff;cursor:pointer;transition:transform .35s,box-shadow .35s;box-shadow:6px 6px 0 var(--ink)}
+  .work-item:hover{transform:translateY(-8px) rotate(-.5deg);box-shadow:10px 14px 0 var(--purple2)}
+  .work-thumb{height:200px;display:flex;align-items:center;justify-content:center;font-size:3.6rem;position:relative;overflow:hidden}
+  .work-thumb::after{content:"View case →";position:absolute;inset:auto 0 0 0;padding:12px;background:var(--ink);color:#fff;font-weight:600;font-size:.9rem;transform:translateY(100%);transition:transform .35s}
+  .work-item:hover .work-thumb::after{transform:none}
+  .work-body{padding:18px 20px}
+  .work-body h3{font-size:1.2rem}
+  .work-body small{color:var(--muted)}
+  .work-item.hide{display:none}
+  .work-item.pop{animation:pop .5s ease both}
+  .t1{background:linear-gradient(135deg,#B9A3F0,#FF9EC9)}
+  .t2{background:linear-gradient(135deg,#9FE7CC,#FFE28A)}
+  .t3{background:linear-gradient(135deg,#FFD0A8,#B6D8FF)}
+  .t4{background:linear-gradient(135deg,#FFB3B3,#C8B6FF)}
+  .t5{background:linear-gradient(135deg,#BDF0E0,#A0C4FF)}
+  .t6{background:linear-gradient(135deg,#FFE5A0,#FFB6D9)}
+
+  /* Modal + toast */
+  .modal{position:fixed;inset:0;background:rgba(22,19,33,.6);display:none;align-items:center;justify-content:center;padding:20px;z-index:60}
+  .modal.open{display:flex;animation:fade .3s ease}
+  .modal-box{background:#fff;border:3px solid var(--ink);border-radius:24px;max-width:520px;width:100%;padding:34px;position:relative;box-shadow:12px 12px 0 var(--purple2);animation:popin .45s cubic-bezier(.2,1.4,.4,1)}
+  .modal-box h3{font-size:1.7rem;margin-bottom:10px}
+  .modal-box p{color:var(--muted)}
+  .x{position:absolute;top:12px;right:14px;border:none;background:none;font-size:1.6rem}
+  .modal-box form{display:grid;gap:12px;margin-top:16px}
+  .modal-box input,.modal-box textarea,.modal-box select{font:inherit;padding:12px 14px;border:2px solid var(--ink);border-radius:12px;width:100%}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,160%);background:var(--ink);color:#fff;padding:14px 22px;border-radius:14px;font-weight:600;z-index:70;transition:transform .45s cubic-bezier(.2,1.2,.4,1);max-width:90vw;text-align:center}
+  .toast.show{transform:translate(-50%,0)}
+  .sticky-cta{position:fixed;right:18px;bottom:18px;z-index:30;transform:scale(0);transition:transform .4s cubic-bezier(.2,1.4,.4,1)}
+  .sticky-cta.show{transform:scale(1)}
+  .sticky-cta .btn{box-shadow:5px 5px 0 var(--ink);animation:ping 2.2s infinite}
+
+  /* Pricing */
+  .price{text-align:left;position:relative;overflow:hidden}
+  .price .amt{font-family:"Fredoka",sans-serif;font-size:2.2rem;font-weight:700;margin:8px 0}
+  .price ul{padding-left:18px;color:var(--muted);margin:12px 0 0;font-size:.93rem}
+  .price.hot{background:var(--ink);color:#fff}
+  .price.hot ul,.price.hot p{color:#c9c0dd}
+  .badge{position:absolute;top:14px;right:-34px;background:var(--yellow);color:var(--ink);font-weight:700;font-size:.72rem;padding:4px 40px;transform:rotate(35deg)}
+
+  /* Contact */
+  .contact{text-align:center;background:var(--purple);color:#fff}
+  .contact .kicker{color:var(--lav2)}
+  .contact h2{font-size:clamp(2.2rem,5vw,3.6rem);font-weight:700;margin:12px 0 16px}
+  .contact p{color:#e0d7f2;font-size:1.1rem}
+  .contact .btn.ghost{background:#fff;color:var(--ink)}
+  .contact .btns{justify-content:center;margin-top:28px}
+  footer{padding:28px 6vw;text-align:center;color:var(--muted);font-size:.9rem;border-top:2px solid var(--ink)}
+
+  /* Reveal */
+  .reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+  .reveal.d1{transition-delay:.1s}.reveal.d2{transition-delay:.2s}.reveal.d3{transition-delay:.3s}
+
+  /* Keyframes */
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-12px) rotate(1deg)}}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+  @keyframes wiggle{0%,100%{transform:rotate(0)}50%{transform:rotate(-3deg)}}
+  @keyframes morph{0%,100%{border-radius:50% 50% 46% 54%}50%{border-radius:58% 42% 52% 48%}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes underline{to{transform:scaleX(1)}}
+  @keyframes marq{to{transform:translateX(-50%)}}
+  @keyframes blinkc{50%{opacity:0}}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @keyframes popin{from{transform:scale(.8);opacity:0}to{transform:none;opacity:1}}
+  @keyframes pop{from{transform:scale(.9);opacity:0}to{transform:none;opacity:1}}
+  @keyframes ping{0%{box-shadow:5px 5px 0 var(--ink),0 0 0 0 rgba(139,92,214,.6)}70%{box-shadow:5px 5px 0 var(--ink),0 0 0 14px rgba(139,92,214,0)}100%{box-shadow:5px 5px 0 var(--ink),0 0 0 0 rgba(139,92,214,0)}}
+
+  @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.reveal,.step{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<canvas id="bg" aria-hidden="true"></canvas>
+<div id="progress"></div>
+<div class="cursor-glow" id="glow" aria-hidden="true"></div>
+
+<nav>
+  <a class="logo" href="#top">The <span>Creative</span> Nerds.</a>
+  <div class="links">
+    <a href="#about">About</a>
+    <a href="#services">Services</a>
+    <a href="#doctors">Doctors</a>
+    <a href="#work">Work</a>
+    <a href="#pricing">Pricing</a>
+    <a class="btn pill" href="#contact">Let's talk</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div>
+    <span class="eyebrow">Digital Marketing Studio</span>
+    <h1>We make brands <span class="creative">creative</span> and <span class="nerds">unforgettable.</span></h1>
+    <span class="typed" id="typed"></span>
+    <p class="lead">Brand launches, personal branding, clinic websites, booking platforms and motion graphics. One nerdy, creative team that handles the look so you can focus on your work.</p>
+    <div class="btns">
+      <a class="btn primary magnet" href="#contact">Start your brand</a>
+      <button class="btn ghost magnet" id="openAudit">Get a free brand audit</button>
+    </div>
+    <div class="hero-stats">
+      <div><span data-count="50">0</span>+<small>Brands launched</small></div>
+      <div><span data-count="120">0</span>+<small>Designs delivered</small></div>
+      <div><span data-count="30">0</span>+<small>Doctors &amp; clinics</small></div>
+    </div>
+  </div>
+
+  <div class="stage" aria-hidden="true">
+    <div class="ring"></div>
+    <div class="blob"></div>
+    <span class="float f1">Brand kit ✓</span>
+    <span class="float f3">Booking live 📅</span>
+    <span class="float f2">Designs on demand</span>
+    <span class="float f4">Reels ▶</span>
+
+    <svg class="character" viewBox="0 0 320 340" xmlns="http://www.w3.org/2000/svg">
+      <path d="M90 250 Q160 215 230 250 L250 340 L70 340 Z" fill="#5B2A86" stroke="#161321" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M140 240 L160 265 L180 240" fill="#fff" stroke="#161321" stroke-width="4" stroke-linejoin="round"/>
+      <rect x="142" y="212" width="36" height="34" fill="#F2C9A0" stroke="#161321" stroke-width="5"/>
+      <ellipse cx="160" cy="150" rx="88" ry="82" fill="#F7D3AE" stroke="#161321" stroke-width="5"/>
+      <ellipse cx="72" cy="158" rx="13" ry="18" fill="#F7D3AE" stroke="#161321" stroke-width="5"/>
+      <ellipse cx="248" cy="158" rx="13" ry="18" fill="#F7D3AE" stroke="#161321" stroke-width="5"/>
+      <path d="M72 140 Q60 60 130 58 Q150 30 185 40 Q240 42 248 140 Q236 96 210 96 Q190 112 160 100 Q130 110 110 96 Q86 102 72 140 Z" fill="#161321"/>
+      <g stroke="#161321" stroke-width="5" fill="#fff" fill-opacity=".35">
+        <circle cx="122" cy="150" r="28"/><circle cx="198" cy="150" r="28"/>
+        <line x1="150" y1="150" x2="170" y2="150"/><line x1="94" y1="146" x2="80" y2="140"/><line x1="226" y1="146" x2="240" y2="140"/>
+      </g>
+      <g id="pupils">
+        <circle cx="122" cy="152" r="7" fill="#161321"/><circle cx="198" cy="152" r="7" fill="#161321"/>
+      </g>
+      <path d="M140 196 Q160 212 182 196" stroke="#161321" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <circle cx="106" cy="184" r="8" fill="#F08C8C" opacity=".6"/><circle cx="214" cy="184" r="8" fill="#F08C8C" opacity=".6"/>
+      <path d="M248 260 Q282 230 262 196" stroke="#161321" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <circle cx="262" cy="190" r="12" fill="#F7D3AE" stroke="#161321" stroke-width="5"/>
+      <rect x="256" y="150" width="12" height="46" rx="4" transform="rotate(18 262 173)" fill="#7B4BB5" stroke="#161321" stroke-width="4"/>
+    </svg>
+  </div>
+</header>
+
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span>Branding <b>✦</b></span><span>Doctor websites <b>✦</b></span><span>Booking platforms <b>✦</b></span><span>Motion graphics <b>✦</b></span><span>Ad creatives <b>✦</b></span><span>Print <b>✦</b></span><span>Packaging <b>✦</b></span><span>AI visuals <b>✦</b></span>
+    <span>Branding <b>✦</b></span><span>Doctor websites <b>✦</b></span><span>Booking platforms <b>✦</b></span><span>Motion graphics <b>✦</b></span><span>Ad creatives <b>✦</b></span><span>Print <b>✦</b></span><span>Packaging <b>✦</b></span><span>AI visuals <b>✦</b></span>
+  </div>
+</div>
+
+<section id="about">
+  <div class="founder">
+    <div class="avatar reveal"><svg viewBox="0 0 320 340" aria-hidden="true"><ellipse cx="160" cy="150" rx="88" ry="82" fill="#F7D3AE" stroke="#161321" stroke-width="5"/><path d="M72 140 Q60 60 130 58 Q150 30 185 40 Q240 42 248 140 Q236 96 210 96 Q190 112 160 100 Q130 110 110 96 Q86 102 72 140 Z" fill="#161321"/><g stroke="#161321" stroke-width="5" fill="#fff" fill-opacity=".35"><circle cx="122" cy="150" r="28"/><circle cx="198" cy="150" r="28"/></g><circle cx="122" cy="152" r="7" fill="#161321"/><circle cx="198" cy="152" r="7" fill="#161321"/><path d="M140 196 Q160 212 182 196" stroke="#161321" stroke-width="5" fill="none" stroke-linecap="round"/></svg></div>
+    <div class="reveal d1">
+      <span class="kicker">Meet the founder</span>
+      <h3>Pushparaj Ravi</h3>
+      <p>Founder of The Creative Nerds. I help doctors, founders and creators look as credible online as they are in person. Every brand gets a clear identity, a website that books or converts, and content that keeps working after launch.</p>
+      <p>[Add your background, years of experience, and key achievements here.]</p>
+      <div class="chips">
+        <span class="chip">Personal branding</span><span class="chip">Doctor websites</span><span class="chip">Booking platforms</span><span class="chip">Motion graphics</span><span class="chip">Brand identity</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="services">
+  <div class="head reveal">
+    <span class="kicker">What we do</span>
+    <h2>Hover a card. See how it helps.</h2>
+    <p>Every service flips to show exactly what you get and why it matters for your growth.</p>
+  </div>
+  <div class="grid" id="flipGrid"></div>
+</section>
+
+<section style="background:var(--ink);color:var(--lav)">
+  <div class="head reveal">
+    <span class="kicker" style="color:var(--lav2)">How it works</span>
+    <h2 style="color:#fff">From first call to live in four steps.</h2>
+  </div>
+  <div class="steps">
+    <div class="step"><h3>Discover</h3><p>A short call to understand your goals, audience and what you want patients or clients to do.</p></div>
+    <div class="step"><h3>Design</h3><p>Brand kit, website concept or campaign creatives, reviewed with you before we build.</p></div>
+    <div class="step"><h3>Build</h3><p>Websites, booking systems and motion pieces built fast, with mobile-first checks.</p></div>
+    <div class="step"><h3>Grow</h3><p>Launch, track results and keep content flowing with on-demand design.</p></div>
+  </div>
+</section>
+
+<section class="doctors" id="doctors">
+  <div class="head reveal">
+    <span class="kicker">For doctors &amp; clinics</span>
+    <h2>Your expertise deserves a brand patients trust.</h2>
+    <p>Personal branding for individual doctors, clinic websites, and online appointment booking, all designed to look calm, clear and professional.</p>
+  </div>
+  <div class="doc-grid">
+    <div class="panel reveal">
+      <h3>Personal branding for doctors</h3>
+      <p>A consistent look for your name, photos, bio and social pages, so patients recognise you before they even call.</p>
+      <div class="tags"><span>Profile photos</span><span>Bio &amp; story</span><span>Social kit</span><span>Google profile</span></div>
+    </div>
+    <div class="panel reveal d1">
+      <h3>Booking demo: try it</h3>
+      <p>Pick a slot. This is how patients will book your clinic online.</p>
+      <div class="slots" id="slots"></div>
+      <p id="slotMsg" style="font-weight:600;color:var(--purple);min-height:1.5em"></p>
+    </div>
+    <div class="panel reveal">
+      <h3>Clinic websites</h3>
+      <p>Fast, mobile-first sites with services, doctor profiles, timings, maps and a clear call to book.</p>
+      <div class="tags"><span>Mobile-first</span><span>SEO ready</span><span>Maps</span><span>WhatsApp button</span></div>
+    </div>
+    <div class="panel reveal d1">
+      <h3>Appointment &amp; booking platforms</h3>
+      <p>Online booking, reminders and a simple patient dashboard, set up for your clinic's hours and doctors.</p>
+      <div class="tags"><span>Online booking</span><span>Reminders</span><span>Multi-doctor</span><span>Reports</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="work">
+  <div class="head reveal">
+    <span class="kicker">Portfolio</span>
+    <h2>Selected work.</h2>
+    <p>Click any project to see the brief, the approach and the result. [Replace these samples with your real projects.]</p>
+  </div>
+  <div class="filters" id="filters">
+    <button class="active" data-f="all">All</button>
+    <button data-f="doctors">Doctors</button>
+    <button data-f="brand">Brand</button>
+    <button data-f="web">Websites</button>
+    <button data-f="motion">Motion</button>
+  </div>
+  <div class="work" id="workGrid"></div>
+</section>
+
+<section id="pricing" style="background:var(--lav2)">
+  <div class="head reveal">
+    <span class="kicker">Packages</span>
+    <h2>Start small. Scale when it works.</h2>
+    <p>Starting prices are indicative. We confirm the exact scope after a short call.</p>
+  </div>
+  <div class="grid">
+    <div class="panel price reveal"><h3>Personal Brand</h3><div class="amt">Starter</div><p>For doctors and founders.</p><ul><li>Logo and colour kit</li><li>Profile and social set</li><li>Brand guide (PDF)</li></ul></div>
+    <div class="panel price hot reveal d1"><span class="badge">MOST PICKED</span><h3>Clinic Launch</h3><div class="amt">Growth</div><p>Website plus booking.</p><ul><li>Clinic website</li><li>Online booking setup</li><li>Google profile and launch creatives</li></ul></div>
+    <div class="panel price reveal d2"><h3>Studio Retainer</h3><div class="amt">Monthly</div><p>Ongoing content and design.</p><ul><li>Monthly posts and reels</li><li>On-demand graphics</li><li>Monthly performance review</li></ul></div>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <span class="kicker">Let's build it</span>
+  <h2>Ready to be the brand people remember?</h2>
+  <p>Tell us what you're building. We reply within one working day.</p>
+  <div class="btns">
+    <button class="btn ghost magnet" id="openContact">Book a free call</button>
+    <a class="btn ghost magnet" href="mailto:letstalk.tcn@gmail.com">letstalk.tcn@gmail.com</a>
+    <a class="btn ghost magnet" href="tel:+917664747498">+91 766 47498</a>
+  </div>
+</section>
+
+<footer>
+  <p>Pushparaj Ravi, Founder · The Creative Nerds · © 2026</p>
+</footer>
+
+<div class="sticky-cta" id="sticky"><button class="btn primary" id="stickyBtn">Book a call</button></div>
+
+<div class="modal" id="workModal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <button class="x" data-close aria-label="Close">×</button>
+    <div id="workModalBody"></div>
+  </div>
+</div>
+
+<div class="modal" id="formModal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <button class="x" data-close aria-label="Close">×</button>
+    <h3 id="formTitle">Free brand audit</h3>
+    <p>Tell us a little about you. We'll send a short review within a day.</p>
+    <form id="leadForm">
+      <input required placeholder="Your name">
+      <input required type="email" placeholder="Email">
+      <input placeholder="Phone (optional)">
+      <select><option>I'm a doctor / clinic</option><option>Founder / startup</option><option>Agency / creator</option></select>
+      <textarea rows="3" placeholder="What do you want to achieve?"></textarea>
+      <button class="btn primary" type="submit">Send request</button>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- Background particles ---------- */
+(function(){
+  const c=document.getElementById('bg'),x=c.getContext('2d');let w,h,dots=[];
+  function size(){w=c.width=innerWidth;h=c.height=innerHeight;dots=Array.from({length:Math.min(60,Math.floor(w/26))},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*3+1,s:Math.random()*.4+.1,c:['#8B5CD6','#FF7AB6','#FFD166','#3DD9A4'][Math.floor(Math.random()*4)]}))}
+  function draw(){x.clearRect(0,0,w,h);dots.forEach(d=>{d.y-=d.s;if(d.y<-5){d.y=h+5;d.x=Math.random()*w}x.beginPath();x.arc(d.x,d.y,d.r,0,6.283);x.fillStyle=d.c;x.globalAlpha=.35;x.fill()});x.globalAlpha=1;if(!matchMedia('(prefers-reduced-motion: reduce)').matches)requestAnimationFrame(draw)}
+  size();draw();addEventListener('resize',size);
+})();
+
+/* ---------- Cursor glow, progress, sticky CTA, pupils follow ---------- */
+const glow=document.getElementById('glow');
+addEventListener('pointermove',e=>{glow.style.left=e.clientX+'px';glow.style.top=e.clientY+'px';
+  const p=document.getElementById('pupils');if(p){const r=document.querySelector('.character').getBoundingClientRect();const dx=(e.clientX-(r.left+r.width/2))/r.width,dy=(e.clientY-(r.top+r.height*.45))/r.height;p.style.transform=`translate(${Math.max(-4,Math.min(4,dx*10))}px,${Math.max(-3,Math.min(3,dy*8))}px)`}});
+addEventListener('scroll',()=>{const h=document.documentElement;document.getElementById('progress').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';document.getElementById('sticky').classList.toggle('show',scrollY>700)});
+
+/* ---------- Magnetic buttons ---------- */
+document.querySelectorAll('.magnet').forEach(b=>{b.addEventListener('pointermove',e=>{const r=b.getBoundingClientRect();b.style.transform=`translate(${(e.clientX-r.left-r.width/2)*.15}px,${(e.clientY-r.top-r.height/2)*.25}px)`});b.addEventListener('pointerleave',()=>b.style.transform='')});
+
+/* ---------- Typewriter ---------- */
+(function(){const words=['Brands that stand out.','Clinics that get booked.','Doctors people trust.','Content that keeps going.'];const el=document.getElementById('typed');let i=0,j=0,del=false;
+function tick(){const w=words[i];el.textContent=w.slice(0,j);if(!del&&j<w.length){j++;setTimeout(tick,60)}else if(!del){del=true;setTimeout(tick,1600)}else if(j>0){j--;setTimeout(tick,30)}else{del=false;i=(i+1)%words.length;setTimeout(tick,200)}}tick()})();
+
+/* ---------- Count-up ---------- */
+const cIO=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;const el=e.target,t=+el.dataset.count;let n=0;const s=setInterval(()=>{n+=Math.ceil(t/40);if(n>=t){n=t;clearInterval(s)}el.textContent=n},30);cIO.unobserve(el)}),{threshold:.6});
+document.querySelectorAll('[data-count]').forEach(el=>cIO.observe(el));
+
+/* ---------- Reveal + step animations ---------- */
+const rIO=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');rIO.unobserve(e.target)}}),{threshold:.15});
+document.querySelectorAll('.reveal,.step').forEach(el=>rIO.observe(el));
+
+/* ---------- Flip service cards ---------- */
+const services=[
+ {i:'📣',t:'Marketing & Advertising',f:'Ad creatives that get attention and clicks.',b:['Ad creatives and carousels','Campaign visuals per platform','A/B variants to test'],h:'Helps you spend less per lead by finding what works.'},
+ {i:'🎬',t:'Motion Graphics & Video',f:'Short, punchy reels and motion edits.',b:['Logo and title animations','Reels and short ads','Explainer clips'],h:'Video is how most people discover you today.'},
+ {i:'🎨',t:'Brand & Identity',f:'Logos, colours and a brand kit that holds together.',b:['Logo suite','Colour and type system','Brand guidelines PDF'],h:'Consistency makes you look established fast.'},
+ {i:'📊',t:'Presentations',f:'Decks that look as sharp as your ideas.',b:['Pitch and sales decks','Clinic and event decks','Speaker-ready layouts'],h:'Win meetings and funding with clear, confident slides.'},
+ {i:'🖨️',t:'Print Creatives',f:'Flyers, posters, brochures and cards.',b:['Clinic brochures','Posters and banners','Business cards'],h:'Great for local reach and walk-in footfall.'},
+ {i:'✏️',t:'Illustration & Artwork',f:'Custom characters and illustrations.',b:['Mascots like ours','Infographic art','Social illustrations'],h:'A friendly face makes your brand memorable.'},
+ {i:'📦',t:'Product & Packaging',f:'Packaging that stands out on shelf and screen.',b:['Label and box design','Mockups','Print-ready files'],h:'Packaging is often the first thing customers see.'},
+ {i:'🛒',t:'Ecommerce',f:'Product visuals and store graphics.',b:['Product photo edits','Banners and collections','Marketplace listings'],h:'Better visuals mean more add-to-carts.'},
+ {i:'🤖',t:'AI Graphics & Videos',f:'Fast modern visuals, reviewed by people.',b:['AI-assisted graphics','Quick social videos','Human polish on every piece'],h:'Faster turnaround without losing quality.'},
+ {i:'🏥',t:'Doctor Personal Branding',f:'A trusted profile for individual doctors.',b:['Profile and bio','Photo and social kit','Google profile setup'],h:'Patients choose the doctor they feel they know.'},
+ {i:'🩺',t:'Clinic Websites',f:'Mobile-first sites that book appointments.',b:['Services and doctor pages','Maps, timings, WhatsApp','Local SEO basics'],h:'More calls and bookings from people searching nearby.'},
+ {i:'📅',t:'Booking Platforms',f:'Online appointment booking and reminders.',b:['Slot management','Patient reminders','Multi-doctor scheduling'],h:'Fewer no-shows and less phone-desk workload.'}
+];
+document.getElementById('flipGrid').innerHTML=services.map((s,k)=>`
+<div class="flip reveal d${k%3}" tabindex="0" onclick="this.classList.toggle('on')">
+ <div class="flip-in">
+  <div class="face front"><div class="ic">${s.i}</div><div><h3>${s.t}</h3><p>${s.f}</p></div></div>
+  <div class="face back"><div><h3>${s.t}</h3><ul>${s.b.map(x=>`<li>${x}</li>`).join('')}</ul><p style="margin-top:10px"><b>Why it helps:</b> ${s.h}</p></div><div class="hint">Tap or hover to flip back</div></div>
+ </div>
+</div>`).join('');
+document.querySelectorAll('#flipGrid .flip').forEach(el=>rIO.observe(el));
+
+/* ---------- Booking demo ---------- */
+const times=['9:00','10:30','11:00','12:00','3:00','4:30','5:00','6:00','7:30'];
+const taken=new Set(['10:30','3:00','6:00']);
+const slotsEl=document.getElementById('slots');
+times.forEach(t=>{const b=document.createElement('button');b.className='slot'+(taken.has(t)?' taken':'');b.textContent=t+' AM/PM'.slice(0,0)+(+t.split(':')[0]<8?' PM':' AM');b.textContent=t;
+ b.onclick=()=>{if(taken.has(t))return;document.querySelectorAll('.slot').forEach(s=>s.classList.remove('sel'));b.classList.add('sel');document.getElementById('slotMsg').textContent=`Booked (demo): ${t}. Patients see this instantly.`;toast('Appointment slot selected 🎉')};
+ slotsEl.appendChild(b)});
+
+/* ---------- Portfolio ---------- */
+const work=[
+ {c:'doctors',t:'t1',i:'🩺',n:'Dr. Profile Kit',m:'Personal branding for a doctor',d:'Brief: Look credible and approachable online.',a:'Logo, photo direction, bio layout, social templates.',r:'[Add real result]'},
+ {c:'web',t:'t2',i:'🏥',n:'Clinic Website',m:'Mobile-first clinic site',d:'Brief: Help patients find services and book quickly.',a:'Services, doctor pages, maps, WhatsApp booking button.',r:'[Add real result]'},
+ {c:'web',t:'t5',i:'📅',n:'Booking Platform',m:'Appointment system with reminders',d:'Brief: Reduce phone calls and no-shows.',a:'Slot setup per doctor, reminders, simple dashboard.',r:'[Add real result]'},
+ {c:'brand',t:'t3',i:'🎨',n:'Brand Identity',m:'Logo and brand kit',d:'Brief: A new brand that feels modern and trustworthy.',a:'Logo suite, colour system, type, guidelines.',r:'[Add real result]'},
+ {c:'motion',t:'t4',i:'🎬',n:'Motion Reel',m:'Animated logo and reels',d:'Brief: Eye-catching short video for social.',a:'Logo animation, title cards, 15s reel.',r:'[Add real result]'},
+ {c:'doctors',t:'t6',i:'📱',n:'Doctor Social Set',m:'Monthly post design',d:'Brief: Keep a doctor active online without the hassle.',a:'Templates, monthly graphics, captions.',r:'[Add real result]'}
+];
+const wg=document.getElementById('workGrid');
+wg.innerHTML=work.map((w,k)=>`<div class="work-item reveal d${k%3}" data-c="${w.c}" data-k="${k}"><div class="work-thumb ${w.t}">${w.i}</div><div class="work-body"><h3>${w.n}</h3><small>${w.m}</small></div></div>`).join('');
+document.querySelectorAll('.work-item').forEach(el=>rIO.observe(el));
+document.querySelectorAll('#filters button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#filters button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const f=b.dataset.f;document.querySelectorAll('.work-item').forEach(el=>{const show=f==='all'||el.dataset.c===f;el.classList.toggle('hide',!show);if(show){el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop')}})});
+wg.addEventListener('click',e=>{const el=e.target.closest('.work-item');if(!el)return;const w=work[+el.dataset.k];
+ document.getElementById('workModalBody').innerHTML=`<span class="kicker">Case study</span><h3>${w.n}</h3><p><b>Brief:</b> ${w.d}</p><p><b>What we did:</b> ${w.a}</p><p><b>Result:</b> ${w.r}</p><button class="btn primary" style="margin-top:12px" data-close>Close</button> <button class="btn ghost" style="margin-top:12px" onclick="closeM('workModal');openForm('Want something like this?')">Get one for me</button>`;openM('workModal')});
+
+/* ---------- Modals & toast ---------- */
+function openM(id){document.getElementById(id).classList.add('open')}
+function closeM(id){document.getElementById(id).classList.remove('open')}
+function openForm(t){document.getElementById('formTitle').textContent=t;openM('formModal')}
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('.modal').classList.remove('open'));
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
+addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal').forEach(m=>m.classList.remove('open'))});
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2800)}
+document.getElementById('openAudit').onclick=()=>openForm('Free brand audit');
+document.getElementById('openContact').onclick=()=>openForm('Book a free call');
+document.getElementById('stickyBtn').onclick=()=>openForm('Book a free call');
+document.getElementById('leadForm').onsubmit=e=>{e.preventDefault();closeM('formModal');e.target.reset();toast('Thanks! We will reply within one working day. ✨')};
+/* Exit-intent style popup after 25s, once per visit */
+setTimeout(()=>{if(!sessionStorage_flag()&&!document.querySelector('.modal.open'))openForm('Before you go: free brand audit')},25000);
+function sessionStorage_flag(){return window.__popped===true}
+document.getElementById('formModal').addEventListener('transitionend',()=>{});
+document.getElementById('formModal').addEventListener('click',()=>window.__popped=true);
+</script>
+</body>
+</html>
